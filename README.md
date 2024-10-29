@@ -1,1 +1,2 @@
 # SIM-Pengmas-CP-kel-B-
+SIM-Pengmas adalah platform digital yang dirancang untuk mengelola dan memfasilitasi proses pengaduan masyarakat kepada instansi pemerintah. Sistem ini memungkinkan masyarakat untuk menyampaikan keluhan, saran, atau laporan secara efisien dan transparan, serta memungkinkan petugas untuk menindaklanjuti dan mengelola pengaduan dengan sistematis.
