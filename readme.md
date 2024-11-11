@@ -1,6 +1,6 @@
 # Sistem Informasi Manajemen Pengaduan Masyarakat
 
-Sistem Informasi Manajemen Pengaduan Masyarakat adalah platform digital yang memungkinkan masyarakat untuk menyampaikan pengaduan, keluhan, atau aspirasi kepada pemerintah secara online. Sistem ini dirancang untuk memudahkan proses pelaporan dan pengelolaan pengaduan dengan lebih efisien dan transparan.
+Sistem Informasi Manajemen Pengaduan Masyarakat adalah platform digital yang memungkinkan masyarakat untuk menyampaikan pengaduan, keluhan, atau aspirasi kepada pemerintah secara online. Sistem ini dirancang untuk memudahkan proses pelaporan dan pengelolaan pengaduan dengan lebih efisien dan transparan dengan keamanan pelaporan masyarakat secara anonim
 
 ## 🌟 Fitur Utama
 
