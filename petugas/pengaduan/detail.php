@@ -136,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_tanggapan'])) 
     <!-- Header dan Tombol Kembali -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2><i class="bi bi-file-text"></i> Detail Pengaduan</h2>
-        <a href="../dashboard.php" class="btn btn-outline-secondary back-button">
+        <a href="list.php" class="btn btn-outline-secondary back-button">
             <i class="bi bi-arrow-left"></i> Kembali
         </a>
     </div>
