@@ -401,7 +401,7 @@ try {
                         <h5 class="mb-0"><i class="fas fa-search me-2"></i>Lacak Pengaduan</h5>
                     </div>
                     <div class="card-body p-4">
-                        <form action="tracking.php" method="GET">
+                        <form action="masyarakat/tracking.php" method="GET">
                             <div class="mb-4">
                                 <label for="no_tiket" class="form-label">Nomor Tiket</label>
                                 <div class="input-group">

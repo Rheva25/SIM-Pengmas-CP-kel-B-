@@ -1,3 +1,36 @@
+<?php
+ini_set("display_errors", 1);
+ini_set("display_startup_errors", 1);
+error_reporting(E_ALL);
+require_once '../includes/header.php';
+
+// Hanya admin yang bisa akses
+if ($_SESSION['role'] !== 'admin') {
+    header("Location: ../auth/login.php");
+    exit();
+}
+
+// Mengambil statistik untuk dashboard
+$stats = [
+    'total_pengaduan' => $koneksi->query("SELECT COUNT(*) FROM pengaduan")->fetchColumn(),
+    'pengaduan_baru' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = '0'")->fetchColumn(),
+    'pengaduan_proses' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = 'proses'")->fetchColumn(),
+    'pengaduan_selesai' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = 'selesai'")->fetchColumn(),
+    'total_petugas' => $koneksi->query("SELECT COUNT(*) FROM users WHERE role = 'petugas'")->fetchColumn(),
+];
+
+// Mengambil data untuk grafik bulanan
+$stmt = $koneksi->query("
+    SELECT DATE_FORMAT(tgl_pengaduan, '%Y-%m') as bulan, COUNT(*) as total
+    FROM pengaduan
+    WHERE tgl_pengaduan >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+    GROUP BY DATE_FORMAT(tgl_pengaduan, '%Y-%m')
+    ORDER BY bulan ASC
+");
+$grafik_data = $stmt->fetchAll();
+?>
+
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -126,7 +159,6 @@
         'pengaduan_proses' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = 'proses'")->fetchColumn(),
         'pengaduan_selesai' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = 'selesai'")->fetchColumn(),
         'total_petugas' => $koneksi->query("SELECT COUNT(*) FROM users WHERE role = 'petugas'")->fetchColumn(),
-        'total_masyarakat' => $koneksi->query("SELECT COUNT(*) FROM masyarakat")->fetchColumn()
     ];
 
     $stmt = $koneksi->query("
@@ -230,15 +262,6 @@
                                 </div>
                                 <span class="badge bg-primary rounded-pill">
                                     <?php echo $stats['total_petugas']; ?>
-                                </span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="bi bi-people me-2"></i>
-                                    Total Masyarakat
-                                </div>
-                                <span class="badge bg-primary rounded-pill">
-                                    <?php echo $stats['total_masyarakat']; ?>
                                 </span>
                             </li>
                         </ul>

@@ -1,4 +1,7 @@
 <?php
+ini_set("display_errors", 1);
+ini_set("display_startup_errors", 1);
+error_reporting(E_ALL);
 require_once '../includes/header.php';
 
 // Hanya petugas yang bisa akses
@@ -6,7 +9,6 @@ if ($_SESSION['role'] !== 'petugas') {
     header("Location: ../auth/login.php");
     exit();
 }
-
 // Mengambil statistik untuk dashboard petugas
 $stats = [
     'total_ditangani' => $koneksi->prepare("
@@ -29,9 +31,8 @@ $perlu_ditangani = $stats['perlu_ditangani']->fetchColumn();
 
 // Mengambil daftar pengaduan terbaru
 $stmt = $koneksi->query("
-    SELECT p.*, m.nama as nama_pelapor 
+    SELECT p.* 
     FROM pengaduan p 
-    INNER JOIN masyarakat m ON p.id_masyarakat = m.id_masyarakat
     WHERE p.status IN ('0', 'proses')
     ORDER BY p.tgl_pengaduan DESC 
     LIMIT 5
@@ -70,7 +71,7 @@ $pengaduan_terbaru = $stmt->fetchAll();
         border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         border: none;
-        
+
     }
 
     .table-card .card-body {
@@ -99,7 +100,7 @@ $pengaduan_terbaru = $stmt->fetchAll();
     <div class="row align-items-center">
         <div class="col-md-6">
             <h2><i class="bi bi-person-gear"></i> Dashboard Petugas</h2>
-            <p class="mb-0">Selamat datang kembali, <?php echo htmlspecialchars($_SESSION['nama']); ?></p>
+            <p class="mb-0">Selamat datang kembali, <?php echo htmlspecialchars($user['nama'] ?? $user['nama_lengkap']); ?></p>
         </div>
         <div class="col-md-6 text-md-end">
             <p class="mb-0"><i class="bi bi-calendar3"></i> <?php echo date('l, d F Y'); ?></p>
@@ -113,7 +114,8 @@ $pengaduan_terbaru = $stmt->fetchAll();
         <div class="card stats-card" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
             <div class="card-body text-center">
                 <div class="stats-icon">
-                    <i class="bi bi-exclamation-triangle text-warning" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3), -1px -1px 2px rgba(255,255,255,0.5);"></i>
+                    <i class="bi bi-exclamation-triangle text-warning"
+                        style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3), -1px -1px 2px rgba(255,255,255,0.5);"></i>
                 </div>
                 <h5 class="card-title">Pengaduan yang Perlu Ditangani</h5>
                 <h2 class="display-4 fw-bold"><?php echo number_format($perlu_ditangani); ?></h2>
@@ -123,10 +125,11 @@ $pengaduan_terbaru = $stmt->fetchAll();
     </div>
 
     <div class="col-md-6 mb-4">
-        <div class="card stats-card" style="background: linear-gradient(135deg, #6a89cc 0%, #4a69bd 100%);">
+        <div class="card stats-card" style="background: linear-gradient(135deg, #34c759 0%, #2a9055 100%);">
             <div class="card-body text-center">
                 <div class="stats-icon">
-                    <i class="bi bi-check-circle text-warning" style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3), -1px -1px 2px rgba(255,255,255,0.5);"></i>
+                    <i class="bi bi-check-circle text-warning"
+                        style="text-shadow: 1px 1px 2px rgba(0,0,0,0.3), -1px -1px 2px rgba(255,255,255,0.5);"></i>
                 </div>
                 <h5 class="card-title">Total Pengaduan Ditangani</h5>
                 <h2 class="display-4 fw-bold"><?php echo $total_ditangani; ?></h2>
@@ -154,7 +157,7 @@ $pengaduan_terbaru = $stmt->fetchAll();
                         <thead class="table-light">
                             <tr>
                                 <th><i class="bi bi-calendar3"></i> Tanggal</th>
-                                <th><i class="bi bi-person"></i> Pelapor</th>
+                                <th><i class="bi bi-person"></i> No Tiket</th>
                                 <th><i class="bi bi-card-text"></i> Judul</th>
                                 <th><i class="bi bi-flag"></i> Status</th>
                                 <th><i class="bi bi-gear"></i> Aksi</th>
@@ -167,7 +170,7 @@ $pengaduan_terbaru = $stmt->fetchAll();
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <i class="bi bi-person-circle me-2"></i>
-                                            <?php echo htmlspecialchars($pengaduan['nama_pelapor']); ?>
+                                            <?php echo htmlspecialchars($pengaduan['no_tiket']); ?>
                                         </div>
                                     </td>
                                     <td><?php echo htmlspecialchars($pengaduan['judul']); ?></td>

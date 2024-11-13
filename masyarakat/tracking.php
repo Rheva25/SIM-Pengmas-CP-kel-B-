@@ -1,6 +1,9 @@
 <?php
+ini_set("display_errors", 1);
+ini_set("display_startup_errors",1);
+error_reporting(E_ALL);
 session_start();
-require_once 'config/koneksi.php';
+require_once '../config/koneksi.php';
 
 // Function untuk format angka
 function formatNumber($number)
@@ -182,7 +185,7 @@ if (isset($_GET['no_tiket'])) {
     <div class="container py-4">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <a href="index.php" class="btn btn-secondary mb-4">
+                <a href="../index.php" class="btn btn-secondary mb-4">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
 

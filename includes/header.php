@@ -1,7 +1,7 @@
 <!-- File: includes/header.php -->
 <?php
 session_start();
-require_once '../config/koneksi.php';
+require_once __DIR__ . '/../config/koneksi.php';
 
 // Cek jika user belum login
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role'])) {

@@ -155,6 +155,8 @@ if (isset($_POST['login'])) {
                 <div class="card animate__animated animate__fadeIn">
                     <div class="card-body p-5">
                         <h3 class="card-title text-center">SIM PENGMAS</h3>
+                        <a href="../index.php" class="btn btn-secondary w-100 mb-4"><i class="fas fa-arrow-left me-2"></i>Kembali</a>
+                        
                         <?php if (isset($error)): ?>
                         <div class="alert alert-danger animate__animated animate__shakeX">
                             <?php echo $error; ?>
