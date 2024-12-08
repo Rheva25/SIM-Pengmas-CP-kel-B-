@@ -3,7 +3,7 @@ ini_set("display_errors", 1);
 ini_set("display_startup_errors", 1);
 error_reporting(E_ALL);
 require_once '../../includes/header.php';
-require_once '../../vendor/setasign/fpdf/fpdf.php'; // Pastikan sudah install FPDF
+require_once '../../vendor/setasign/fpdf/fpdf.php';
 
 // Cek role admin
 if ($_SESSION['role'] !== 'admin') {
@@ -39,51 +39,78 @@ if (isset($_POST['generate_report'])) {
 
     // Generate PDF
     if (isset($_POST['format']) && $_POST['format'] === 'pdf') {
-        class PDF extends FPDF
-        {
-            function Header()
-            {
-                $this->SetFont('Arial', 'B', 16);
-                $this->Cell(0, 10, 'LAPORAN PENGADUAN MASYARAKAT', 0, 1, 'C');
-                $this->SetFont('Arial', '', 10);
-                $this->Cell(0, 10, 'Periode: ' . date('d/m/Y', strtotime($_POST['start_date'])) . ' - ' . date('d/m/Y', strtotime($_POST['end_date'])), 0, 1, 'C');
-                $this->Ln(10);
-            }
-
-            function Footer()
-            {
-                $this->SetY(-15);
-                $this->SetFont('Arial', 'I', 8);
-                $this->Cell(0, 10, 'Halaman ' . $this->PageNo() . '/{nb}', 0, 0, 'C');
-            }
+        // Hapus output buffering yang mungkin ada
+        while (ob_get_level()) {
+            ob_end_clean();
         }
 
-        $pdf = new PDF();
-        $pdf->AliasNbPages();
-        $pdf->AddPage();
+        // Periksa tanggal valid
+        $start_date = isset($_POST['start_date']) ? $_POST['start_date'] : null;
+        $end_date = isset($_POST['end_date']) ? $_POST['end_date'] : null;
+        if (!$start_date || !$end_date) {
+            die('Tanggal tidak valid.');
+        }
 
-        // Table Header
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(40, 7, 'Tanggal', 1);
-        $pdf->Cell(90, 7, 'Isi Pengaduan', 1);
-        $pdf->Cell(60, 7, 'Status', 1);
-        $pdf->Ln();
+        try {
+            // Query database dengan PDO (menggunakan $koneksi yang sudah ada)
+            $query = "SELECT * FROM pengaduan WHERE tgl_pengaduan BETWEEN :start_date AND :end_date";
+            $stmt = $koneksi->prepare($query);
+            $stmt->bindParam(':start_date', $start_date);
+            $stmt->bindParam(':end_date', $end_date);
+            $stmt->execute();
+            $pengaduan = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Table Content
-        $pdf->SetFont('Arial', '', 10);
-        foreach ($pengaduan as $p) {
-            $pdf->Cell(40, 7, date('d/m/Y', strtotime($p['tgl_pengaduan'])), 1);
+            if (empty($pengaduan)) {
+                die('Tidak ada data pengaduan yang tersedia.');
+            }
 
-            // Membatasi teks isi pengaduan agar tidak terlalu panjang
-            $isi = substr($p['isi_laporan'], 0, 50) . (strlen($p['isi_laporan']) > 50 ? '...' : '');
-            $pdf->Cell(90, 7, $isi, 1);
+            class PDF extends FPDF
+            {
+                function Header()
+                {
+                    global $start_date, $end_date;
+                    $this->SetFont('Arial', 'B', 16);
+                    $this->Cell(0, 10, 'LAPORAN PENGADUAN MASYARAKAT', 0, 1, 'C');
+                    $this->SetFont('Arial', '', 10);
+                    $this->Cell(0, 10, 'Periode: ' . date('d/m/Y', strtotime($start_date)) . ' - ' . date('d/m/Y', strtotime($end_date)), 0, 1, 'C');
+                    $this->Ln(10);
+                }
 
-            $pdf->Cell(60, 7, ucfirst($p['status']), 1);
+                function Footer()
+                {
+                    $this->SetY(-15);
+                    $this->SetFont('Arial', 'I', 8);
+                    $this->Cell(0, 10, 'Halaman ' . $this->PageNo() . '/{nb}', 0, 0, 'C');
+                }
+            }
+
+            $pdf = new PDF();
+            $pdf->AliasNbPages();
+            $pdf->AddPage();
+
+            // Table Header
+            $pdf->SetFont('Arial', 'B', 10);
+            $pdf->Cell(40, 7, 'Tanggal', 1);
+            $pdf->Cell(90, 7, 'Isi Pengaduan', 1);
+            $pdf->Cell(60, 7, 'Status', 1);
             $pdf->Ln();
-        }
 
-        $pdf->Output('D', 'laporan_pengaduan_' . date('Ymd') . '.pdf');
-        exit();
+            // Table Content
+            $pdf->SetFont('Arial', '', 10);
+            foreach ($pengaduan as $p) {
+                $pdf->Cell(40, 7, date('d/m/Y', strtotime($p['tgl_pengaduan'])), 1);
+                $isi = substr($p['isi_laporan'], 0, 50) . (strlen($p['isi_laporan']) > 50 ? '...' : '');
+                $pdf->Cell(90, 7, $isi, 1);
+                $pdf->Cell(60, 7, ucfirst($p['status']), 1);
+                $pdf->Ln();
+            }
+
+            // Hapus semua output buffering sebelum mengeluarkan PDF
+            $pdf->Output('D', 'laporan_pengaduan_' . date('Ymd') . '.pdf');
+            exit();
+        } catch (Exception $e) {
+            die('Error: ' . $e->getMessage());
+        }
     }
 }
 
@@ -95,6 +122,8 @@ $summary = [
     'selesai' => $koneksi->query("SELECT COUNT(*) FROM pengaduan WHERE status = 'selesai'")->fetchColumn(),
 ];
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="id">
@@ -272,18 +301,12 @@ $summary = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Set default dates
+        // Biarkan pengguna mengisi tanggal secara manual
         document.addEventListener('DOMContentLoaded', function () {
-            // Set default start date to first day of current month
-            const startDate = new Date();
-            startDate.setDate(1);
-            document.querySelector('input[name="start_date"]').value = startDate.toISOString().split('T')[0];
-
-            // Set default end date to current date
-            const endDate = new Date();
-            document.querySelector('input[name="end_date"]').value = endDate.toISOString().split('T')[0];
+            // Tidak ada pengaturan tanggal default, biarkan input tanggal kosong
         });
     </script>
+
 </body>
 
 </html>
